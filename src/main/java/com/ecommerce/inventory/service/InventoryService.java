@@ -15,6 +15,36 @@ public class InventoryService {
         this.inventoryRepository = inventoryRepository;
     }
 
+    public Inventory updateInventory(String productId, Integer quantity){
+
+        Optional<Inventory> existingInventory = getInventoryByProductId(productId);
+
+        if(!existingInventory.isPresent()){
+            Inventory inventory = new Inventory();
+            inventory.setProductId(productId);
+            inventory.setQuantity(quantity);
+            return inventoryRepository.save(inventory);
+        }
+
+        Inventory inventory = existingInventory.get();
+        inventory.setQuantity(quantity);
+        return inventoryRepository.save(inventory);
+    }
+
+    public boolean decreaseInventory(String productId, Integer quantity){
+        Optional<Inventory> existingInventory = getInventoryByProductId(productId);
+
+        if(existingInventory.isPresent()){
+            Inventory inventory = existingInventory.get();
+            if(inventory.getQuantity() >= quantity){
+                inventory.setQuantity(inventory.getQuantity() - quantity);
+                inventoryRepository.save(inventory);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Optional<Inventory> getInventoryByProductId(String productId){
         return inventoryRepository.findByProductId(productId);
     }
